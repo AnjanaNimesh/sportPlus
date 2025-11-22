@@ -3,6 +3,34 @@ export interface User {
   username: string;
 }
 
+export interface League {
+  idLeague: string;
+  strLeague: string;
+  strSport: string;
+  strLeagueAlternate: string | null;
+}
+
+export interface Team {
+  idTeam: string;
+  strTeam: string;
+  strTeamShort?: string;
+  strAlternate?: string;
+  intFormedYear?: string;
+  strSport?: string;
+  strLeague?: string;
+  idLeague?: string;
+  strStadium?: string;
+  strStadiumThumb?: string;
+  strStadiumLocation?: string;
+  intStadiumCapacity?: string;
+  strWebsite?: string;
+  strDescriptionEN?: string;
+  strTeamBadge?: string;
+  strTeamJersey?: string;
+  strTeamLogo?: string;
+  strTeamFanart1?: string;
+  strTeamBanner?: string;
+}
 
 export interface Colors {
   background: string;
@@ -32,3 +60,11 @@ export interface AuthState {
   logout: () => Promise<void>;
 }
 
+export interface SportsState {
+  leagues: League[];
+  favorites: League[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+  fetchLeagues: () => Promise<void>;
+  toggleFavorite: (league: League) => void;
+}

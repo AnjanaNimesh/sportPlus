@@ -2,12 +2,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage'; // Assumin
 import { router } from 'expo-router';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { darkColors, lightColors } from '../constants/colors';
-import store from '../store';
+import store, { AppDispatch, RootState } from '../store';
+import { fetchLeagues, loadFavorites, toggleFavorite as toggleFavoriteAction } from '../store/sportsSlice';
 import {
     AuthState,
+    League,
     ScreenName,
+    SportsState,
     ThemeContextType,
     User
 } from '../types';
@@ -15,10 +18,12 @@ import {
 // --- Context Definitions ---
 export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export const AuthContext = createContext<AuthState | undefined>(undefined);
+export const SportsContext = createContext<SportsState | undefined>(undefined);
 
 // --- Context Hooks ---
 export const useTheme = () => useContext(ThemeContext)!;
 export const useAuth = () => useContext(AuthContext)!;
+export const useSports = () => useContext(SportsContext)!;
 
 // --- App Providers Component ---
 interface AppProvidersProps {
@@ -103,14 +108,39 @@ export const AppProviders: React.FC<AppProvidersProps> = ({ children, setAppScre
         };
         loadInitialData();
     }, []);
+    // Inner provider component that can use Redux hooks (must be rendered inside <Provider>)
+    const InnerProviders: React.FC<{ children: React.ReactNode }> = ({ children: innerChildren }) => {
+        const dispatch = useDispatch<AppDispatch>();
+        const sports = useSelector((state: RootState) => state.sports);
+
+        useEffect(() => {
+            // Load persisted favorites into redux store on mount
+            dispatch(loadFavorites());
+        }, [dispatch]);
+
+        const sportsContextValue: SportsState = useMemo(() => ({
+            leagues: sports.leagues,
+            favorites: sports.favorites,
+            status: sports.status,
+            error: sports.error,
+            fetchLeagues: async () => { await dispatch(fetchLeagues()); },
+            toggleFavorite: (league: League) => { dispatch(toggleFavoriteAction(league)); },
+        }), [sports, dispatch]);
+
+        return (
+            <SportsContext.Provider value={sportsContextValue}>
+                {innerChildren}
+            </SportsContext.Provider>
+        );
+    };
 
     return (
         <ThemeContext.Provider value={themeContextValue}>
             <AuthContext.Provider value={authContextValue}>
                 <Provider store={store}>
-                   
+                    <InnerProviders>
                         {children}
-                    
+                    </InnerProviders>
                 </Provider>
             </AuthContext.Provider>
         </ThemeContext.Provider>
