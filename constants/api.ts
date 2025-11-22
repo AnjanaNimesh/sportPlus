@@ -1,0 +1,1 @@
+export const DUMMY_AUTH_URL = 'https://dummyjson.com/auth/login';
