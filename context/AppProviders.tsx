@@ -1,8 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'; // Assuming this module is installed
 import { router } from 'expo-router';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useColorScheme } from 'react-native';
 import { Provider, useDispatch, useSelector } from 'react-redux';
-import { lightColors } from '../constants/colors';
+import { darkColors, lightColors } from '../constants/colors';
 import store, { AppDispatch, RootState } from '../store';
 import { fetchLeagues, loadFavorites, toggleFavorite as toggleFavoriteAction } from '../store/sportsSlice';
 import {
@@ -31,18 +32,18 @@ interface AppProvidersProps {
 }
 
 export const AppProviders: React.FC<AppProvidersProps> = ({ children, setAppScreen }) => {
-    // Force light theme only
-    const [theme] = useState<'light' | 'dark'>('light');
+    const systemTheme = useColorScheme();
+    const [theme, setTheme] = useState<'light' | 'dark'>(systemTheme || 'light');
 
-    // Keep toggleTheme as a no-op so existing components that call it won't break
+    // Theme Logic
     const toggleTheme = useCallback(() => {
-        /* no-op: dark theme removed */
+        setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
     }, []);
 
     const themeContextValue = useMemo(() => ({
-        theme,
-        toggleTheme,
-        colors: lightColors,
+        theme, 
+        toggleTheme, 
+        colors: theme === 'dark' ? darkColors : lightColors
     }), [theme, toggleTheme]);
 
     // Auth State
