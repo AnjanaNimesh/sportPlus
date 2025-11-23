@@ -43,7 +43,7 @@ const HomeScreen: React.FC = () => {
   }, [searchQuery, leagues]);
   
   const handlePress = (item: League) => {
-    router.push(`/details/${item.idLeague}`);
+    router.push({ pathname: '/details/[id]', params: { id: String(item.idLeague) } });
   };
 
   const renderItem = ({ item, index }: { item: League; index: number }) => (

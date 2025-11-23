@@ -21,7 +21,7 @@ const FavoritesScreen: React.FC = () => {
   }, []);
 
   const handlePress = (item: League) => {
-    router.push(`/details/${item.idLeague}`);
+    router.push({ pathname: '/details/[id]', params: { id: String(item.idLeague) } });
   };
 
   const renderItem = ({ item }: { item: League }) => (
